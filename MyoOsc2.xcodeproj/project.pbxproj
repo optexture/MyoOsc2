@@ -21,6 +21,7 @@
 		32815AE0209C1D0B00911E6C /* Common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32815ADE209C1D0B00911E6C /* Common.cpp */; };
 		32815AE3209C1E0700911E6C /* DeviceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32815AE1209C1E0700911E6C /* DeviceManager.cpp */; };
 		32815AE6209C2CDC00911E6C /* DataSender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32815AE4209C2CDC00911E6C /* DataSender.cpp */; };
+		32815AE9209D90A200911E6C /* DataPaths.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 32815AE7209D90A200911E6C /* DataPaths.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -69,6 +70,8 @@
 		32815AE2209C1E0700911E6C /* DeviceManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DeviceManager.h; sourceTree = "<group>"; };
 		32815AE4209C2CDC00911E6C /* DataSender.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DataSender.cpp; sourceTree = "<group>"; };
 		32815AE5209C2CDC00911E6C /* DataSender.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataSender.h; sourceTree = "<group>"; };
+		32815AE7209D90A200911E6C /* DataPaths.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DataPaths.cpp; sourceTree = "<group>"; };
+		32815AE8209D90A200911E6C /* DataPaths.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataPaths.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +116,8 @@
 				32815AE2209C1E0700911E6C /* DeviceManager.h */,
 				32815AE4209C2CDC00911E6C /* DataSender.cpp */,
 				32815AE5209C2CDC00911E6C /* DataSender.h */,
+				32815AE7209D90A200911E6C /* DataPaths.cpp */,
+				32815AE8209D90A200911E6C /* DataPaths.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -251,6 +256,7 @@
 				32815AAA209C04F900911E6C /* main.cpp in Sources */,
 				32815ACC209C08ED00911E6C /* OscOutboundPacketStream.cpp in Sources */,
 				32815AD2209C08ED00911E6C /* IpEndpointName.cpp in Sources */,
+				32815AE9209D90A200911E6C /* DataPaths.cpp in Sources */,
 				32815AE0209C1D0B00911E6C /* Common.cpp in Sources */,
 				32815AE6209C2CDC00911E6C /* DataSender.cpp in Sources */,
 				32815AD1209C08ED00911E6C /* UdpSocket.cpp in Sources */,
