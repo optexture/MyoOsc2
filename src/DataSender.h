@@ -22,6 +22,8 @@ public:
 
   virtual ~DataSender() {}
 
+  void flushPoseStates();
+
   /// Called when a Myo has been paired.
   /// @param device The Myo for this event.
   /// @param timestamp The timestamp of when the event is received by the SDK. Timestamps are 64 bit unsigned
@@ -157,13 +159,14 @@ private:
   static void logPath(const std::string& path);
   static void logVal(float val);
   static void logVal(int8_t val);
+  static void logVal(uint8_t val);
   static void logVal(bool val);
   static void logVector(const myo::Vector3<float>& vec);
   static void logQuaterion(const myo::Quaternion<float>& quat);
 
   const DeviceDataPaths& devicePaths(MyoPtr device) {
-    auto id = _devices[device];
-    return _paths[id];
+    const auto& state = _devices[device];
+    return state.paths;
   }
 
   osc::OutboundPacketStream beginMessage(const std::string& path);
@@ -191,6 +194,5 @@ private:
   const Settings& _settings;
   char _buffer[OUTPUT_BUFFER_SIZE];
   std::unique_ptr<UdpTransmitSocket> _socket;
-  DataPaths _paths;
 };
 

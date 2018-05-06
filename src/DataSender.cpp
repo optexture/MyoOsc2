@@ -6,6 +6,16 @@
 #include "DataSender.h"
 #include <iomanip>
 
+static myo::Vector3<float> quaternionToVector(const myo::Quaternion<float>& quat) {
+  // Calculate Euler angles (roll, pitch, and yaw) from the unit quaternion.
+  float yaw = atan2(2.0f * (quat.w() * quat.z() + quat.x() * quat.y()),
+                    1.0f - 2.0f * (quat.y() * quat.y() + quat.z() * quat.z()));
+  float pitch = asin(2.0f * (quat.w() * quat.y() - quat.z() * quat.x()));
+  float roll = atan2(2.0f * (quat.w() * quat.x() + quat.y() * quat.z()),
+                     1.0f - 2.0f * (quat.x() * quat.x() + quat.y() * quat.y()));
+  return myo::Vector3<float>(yaw, pitch, roll);
+}
+
 DataSender::DataSender(DeviceManager& devices,
                        const Settings& settings)
 : _devices(devices)
@@ -21,6 +31,10 @@ void DataSender::logVal(float val) {
 }
 
 void DataSender::logVal(int8_t val) {
+  std::cout << "  " << std::setw(10) << std::right << (int)val;
+}
+
+void DataSender::logVal(uint8_t val) {
   std::cout << "  " << std::setw(10) << std::right << (int)val;
 }
 
@@ -93,6 +107,8 @@ void DataSender::onUnpair(MyoPtr device, uint64_t timestamp) {
 }
 
 void DataSender::onConnect(MyoPtr device, uint64_t timestamp, myo::FirmwareVersion firmwareVersion) {
+  device->setStreamEmg(myo::Myo::streamEmgEnabled);
+  // unlock..?
   sendMessage(devicePaths(device).connected, true);
 }
 
@@ -104,10 +120,10 @@ void DataSender::onDisconnect(MyoPtr device, uint64_t timestamp) {
 void DataSender::onArmSync(MyoPtr device, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation, myo::WarmupState warmupState) {
   const auto& paths = devicePaths(device);
   sendMessage(paths.synced, true);
-  sendMessage(paths.arm, static_cast<int>(arm));
-  sendMessage(paths.deviceDirection, static_cast<int>(xDirection));
-  sendMessage(paths.armRotation, static_cast<int>(rotation));
-  sendMessage(paths.warmupState, static_cast<int>(warmupState));
+  sendMessage(paths.arm, static_cast<int8_t>(arm));
+  sendMessage(paths.deviceDirection, static_cast<int8_t>(xDirection));
+  sendMessage(paths.armRotation, static_cast<int8_t>(rotation));
+  sendMessage(paths.warmupState, static_cast<int8_t>(warmupState));
 }
 
 void DataSender::onArmUnsync(MyoPtr device, uint64_t timestamp) {
@@ -123,10 +139,54 @@ void DataSender::onLock(MyoPtr device, uint64_t timestamp) {
   sendMessage(devicePaths(device).locked, true);
 }
 
+void DataSender::onPose(MyoPtr device, uint64_t timestamp, myo::Pose pose) {
+  auto& state = _devices[device];
+  auto i = static_cast<std::size_t>(pose.type());
+  sendMessage(state.paths.poses[i], true);
+  state.poses[i] = true;
+}
+
+void DataSender::flushPoseStates() {
+  for (auto& state : _devices) {
+    for (auto i = 0; i < numPoses; i++) {
+      if (state.poses[i]) {
+        sendMessage(state.paths.poses[i], true);
+        state.poses[i] = false;
+      }
+    }
+  }
+}
+
+void DataSender::onOrientationData(MyoPtr device, uint64_t timestamp, const myo::Quaternion<float> &rotation) {
+  const auto& paths = devicePaths(device);
+  sendMessage(paths.orientQuat, rotation);
+  sendMessage(paths.orientVec, quaternionToVector(rotation));
+}
+
 // units of g
 void DataSender::onAccelerometerData(MyoPtr device, uint64_t timestamp,
                                      const myo::Vector3<float>& accel)
 {
-  auto id = _devices[device];
-  sendMessage(_paths[id].accel, accel);
+  sendMessage(devicePaths(device).accel, accel);
+}
+
+void DataSender::onGyroscopeData(MyoPtr device, uint64_t timestamp,
+                                 const myo::Vector3<float> &gyro) {
+  sendMessage(devicePaths(device).gyro, gyro);
+}
+
+void DataSender::onRssi(MyoPtr device, uint64_t timestamp, int8_t rssi) {
+  sendMessage(devicePaths(device).rssi, rssi);
+}
+
+void DataSender::onBatteryLevelReceived(MyoPtr device, uint64_t timestamp, uint8_t level) {
+  sendMessage(devicePaths(device).battery, level);
+}
+
+void DataSender::onEmgData(MyoPtr device, uint64_t timestamp, const int8_t *emg) {
+  sendMessage(devicePaths(device).emg, emg);
+}
+
+void DataSender::onWarmupCompleted(MyoPtr device, uint64_t timestamp, myo::WarmupResult warmupResult) {
+  sendMessage(devicePaths(device).warmupResult, static_cast<int8_t>(warmupResult));
 }

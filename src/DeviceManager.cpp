@@ -5,33 +5,28 @@
 
 #include "DeviceManager.h"
 
-MyoId DeviceManager::registerDevice(MyoPtr device) {
-  auto id = getDeviceId(device);
-  if (id != unknownMyoId) {
-    return id;
-  }
-  for (id = 0; id < _devices.size(); id++) {
-    if (_devices[id] == nullptr) {
-      _devices[id] = device;
-      return id;
+DeviceState& DeviceManager::registerDevice(MyoPtr device) {
+  for (DeviceState& state : _devices) {
+    if (state.device == device) {
+      return state;
     }
   }
-  _devices.push_back(device);
-  return _devices.size() - 1;
+  for (MyoId id = 0; id < _devices.size(); id++) {
+    DeviceState& state = _devices[id];
+    if (!state.device) {
+      state.device = device;
+      return state;
+    }
+  }
+  _devices.emplace_back(_devices.size() - 1);
+  return _devices.back();
 }
 
 void DeviceManager::unregisterDevice(MyoPtr device) {
-  auto id = getDeviceId(device);
-  if (id != unknownMyoId) {
-    _devices[id] = nullptr;
-  }
-}
-
-MyoId DeviceManager::getDeviceId(MyoPtr device) const {
-  for (MyoId id = 0; id < _devices.size(); id++) {
-    if (_devices[id] == device) {
-      return id;
+  for (DeviceState& state : _devices) {
+    if (state.device == device) {
+      state.clear();
+      return;
     }
   }
-  return unknownMyoId;
 }
