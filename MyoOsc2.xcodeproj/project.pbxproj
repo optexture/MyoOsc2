@@ -381,6 +381,7 @@
 					libs/oscpack,
 					libs/myo.framework/Headers,
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -397,6 +398,7 @@
 					libs/oscpack,
 					libs/myo.framework/Headers,
 				);
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -411,7 +413,7 @@
 				32815AAC209C04F900911E6C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		32815AAD209C04F900911E6C /* Build configuration list for PBXNativeTarget "MyoOsc2" */ = {
 			isa = XCConfigurationList;
@@ -420,7 +422,7 @@
 				32815AAF209C04F900911E6C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

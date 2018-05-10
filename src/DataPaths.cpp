@@ -13,7 +13,7 @@ const DeviceDataPaths& DataPaths::operator[](MyoId id) {
 }
 
 DeviceDataPaths::DeviceDataPaths(MyoId id) {
-  std::string base = "/myo/" + std::to_string(id) + "/";
+  std::string base = "/myo/" + std::to_string(static_cast<int>(id)) + "/";
   paired = base + "paired";
   connected = base + "connected";
   synced = base + "synced";

@@ -28,11 +28,11 @@ int main(int argc, char * argv[]) {
     hub.addListener(&sender);
 
     while (true) {
-      hub.run(1000 / 20);
+      hub.run(10);
       for (auto& state : devices) {
         if (state.device) {
-          state.device->requestRssi();
-          state.device->requestBatteryLevel();
+//          state.device->requestRssi();
+//          state.device->requestBatteryLevel();
         }
       }
     }
