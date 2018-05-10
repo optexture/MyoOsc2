@@ -25,6 +25,7 @@ enum OptionIndex {
   UNKNOWN,
   HELP,
   LOG,
+  VERBOSE,
 };
 enum OptionType {DISABLE, ENABLE, OTHER};
 
@@ -39,7 +40,8 @@ const char usageText[] =
 const option::Descriptor usage[] =
 {
   {UNKNOWN,     0,            "",   "",           Arg::Unknown,   usageText},
-  {LOG,         ENABLE,       "l",  "log",        Arg::None,      "--log Enable OSC debug logging."},
+  {LOG,         ENABLE,       "l",  "log",        Arg::None,      "--log Enable standard logging."},
+  {VERBOSE,     ENABLE,       "v",  "verbose",    Arg::None,      "--log Enable verbose debug logging." },
   {HELP,        0,            "",   "help",       Arg::None,      "--help Print usage and exit."},
   {0, 0, 0, 0, 0, 0},
 };
@@ -63,11 +65,15 @@ bool Settings::parseArgs(int argc, char **argv) {
   port = 7777;
   hostname = "127.0.0.1";
   logging = true;
+  verbose = false;
 
   for (const auto& opt : options) {
     switch (opt.index()) {
       case LOG:
         logging = opt.type() == ENABLE;
+        break;
+      case VERBOSE:
+        verbose = opt.type() == ENABLE;
         break;
       case UNKNOWN:
         std::cerr << "Unknown option: " << std::string(opt.name, opt.namelen) << "\n\n";

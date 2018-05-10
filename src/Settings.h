@@ -13,11 +13,13 @@ public:
   Settings()
   : hostname("localhost")
   , port(7777)
-  , logging(false) {}
+  , logging(true)
+  , verbose(false) {}
 
   bool parseArgs(int argc, char **argv);
 
   std::string hostname;
   int port;
   bool logging;
+  bool verbose;
 };
