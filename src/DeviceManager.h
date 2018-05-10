@@ -13,7 +13,7 @@
 
 class DeviceState {
 public:
-  explicit DeviceState(MyoId i) : deviceId(i), paths(i) {}
+  DeviceState(MyoId i, MyoPtr d) : deviceId(i), paths(i), device(d) {}
 
   void clear() {
     device = nullptr;

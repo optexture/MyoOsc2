@@ -2,3 +2,19 @@
 *\.xcuserdatad/
 
 *.xctestrun
+
+\.vs/
+
+vs/Debug/MyoOsc2\.tlog/
+
+*.obj
+
+*.log
+
+*.ilk
+
+*.pdb
+
+*.idb
+
+*.user

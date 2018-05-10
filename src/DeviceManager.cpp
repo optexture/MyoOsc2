@@ -18,7 +18,7 @@ DeviceState& DeviceManager::registerDevice(MyoPtr device) {
       return state;
     }
   }
-  _devices.emplace_back(_devices.size() - 1);
+  _devices.emplace_back(_devices.size(), device);
   return _devices.back();
 }
 

@@ -44,7 +44,7 @@ const option::Descriptor usage[] =
   {0, 0, 0, 0, 0, 0},
 };
 
-bool Settings::parseArgs(int argc, char *argv[]) {
+bool Settings::parseArgs(int argc, char **argv) {
   argc-=(argc>0); argv+=(argc>0); // skip program name argv[0] if present
   option::Stats  stats(usage, argc, argv);
   std::vector<option::Option> options(stats.options_max);
@@ -55,14 +55,14 @@ bool Settings::parseArgs(int argc, char *argv[]) {
     return false;
   }
 
-  if (options[HELP] || argc == 0) {
+  if (options[HELP]) {
     option::printUsage(std::cerr, usage);
     return false;
   }
 
   port = 7777;
   hostname = "127.0.0.1";
-  logging = false;
+  logging = true;
 
   for (const auto& opt : options) {
     switch (opt.index()) {
