@@ -6,19 +6,23 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 #include "ip/UdpSocket.h"
 #include "osc/OscOutboundPacketStream.h"
 
 #include "Common.h"
 #include "DataPaths.h"
 #include "DeviceManager.h"
+#include "Logger.h"
 #include "Settings.h"
 
 #define OUTPUT_BUFFER_SIZE 1024
 
 class DataSender : public myo::DeviceListener {
 public:
-  explicit DataSender(DeviceManager& devices, const Settings& settings);
+  DataSender(DeviceManager& devices,
+             const Settings& settings,
+             Logger& logger);
 
   virtual ~DataSender() {}
 
@@ -156,14 +160,6 @@ public:
   void onWarmupCompleted(MyoPtr device, uint64_t timestamp, myo::WarmupResult warmupResult) override;
 
 private:
-  static void logPath(const std::string& path);
-  static void logVal(float val);
-  static void logVal(int8_t val);
-  static void logVal(uint8_t val);
-  static void logVal(bool val);
-  static void logVector(const myo::Vector3<float>& vec);
-  static void logQuaterion(const myo::Quaternion<float>& quat);
-
   const DeviceDataPaths& devicePaths(MyoPtr device) {
     const auto& state = _devices[device];
     return state.paths;
@@ -174,24 +170,32 @@ private:
   void send(const osc::OutboundPacketStream& p);
 
   template<typename T>
-  void sendMessage(const std::string& path, T val) {
+  void send(const std::string& path, T val) {
     send(beginMessage(path) << val << osc::EndMessage);
-    if (_settings.logging) {
-      logPath(path);
-      logVal(val);
-      std::cout << std::endl;
-    }
+  }
+
+  template<typename T>
+  void sendMessage(const std::string& path, T val) {
+    send(path, val);
+    _logger.verboseMessage(path, val);
   }
   void sendMessage(const std::array<std::string, emgLength>& path,
                    const int8_t* vals);
-  void sendMessage(const std::string& path, const char* val);
   void sendMessage(const std::array<std::string, 3>& path,
                    myo::Vector3<float> vec);
   void sendMessage(const std::array<std::string, 4>& path,
                    myo::Quaternion<float> quat);
 
+  template<
+    typename T,
+    typename = std::enable_if_t<std::is_enum<T>::value>>
+  void sendEnumMessage(const std::string& path, T val) {
+    sendMessage(path, static_cast<std::int8_t>(val));
+  }
+
   DeviceManager& _devices;
   const Settings& _settings;
+  Logger& _logger;
   char _buffer[OUTPUT_BUFFER_SIZE];
   std::unique_ptr<UdpTransmitSocket> _socket;
 };

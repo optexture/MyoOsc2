@@ -4,9 +4,9 @@
 //
 
 #include "DataSender.h"
-#include <iomanip>
 
-static myo::Vector3<float> quaternionToVector(const myo::Quaternion<float>& quat) {
+static myo::Vector3<float>
+quaternionToVector(const myo::Quaternion<float>& quat) {
   // Calculate Euler angles (roll, pitch, and yaw) from the unit quaternion.
   float yaw = atan2(2.0f * (quat.w() * quat.z() + quat.x() * quat.y()),
                     1.0f - 2.0f * (quat.y() * quat.y() + quat.z() * quat.z()));
@@ -17,43 +17,12 @@ static myo::Vector3<float> quaternionToVector(const myo::Quaternion<float>& quat
 }
 
 DataSender::DataSender(DeviceManager& devices,
-                       const Settings& settings)
+                       const Settings& settings,
+                       Logger& logger)
 : _devices(devices)
 , _settings(settings)
+, _logger(logger)
 , _socket(std::make_unique<UdpTransmitSocket>(IpEndpointName(settings.hostname.c_str(), settings.port))) {}
-
-void DataSender::logPath(const std::string& path) {
-  std::cout << std::setw(20) << std::setfill(' ') << std::left << (path + ":");
-}
-
-void DataSender::logVal(float val) {
-  std::cout << "  " << std::setw(10) << std::right << std::setprecision(2) << val;
-}
-
-void DataSender::logVal(int8_t val) {
-  std::cout << "  " << std::setw(10) << std::right << (int)val;
-}
-
-void DataSender::logVal(uint8_t val) {
-  std::cout << "  " << std::setw(10) << std::right << (int)val;
-}
-
-void DataSender::logVal(bool val) {
-  std::cout << "  " << std::boolalpha << std::right << val;
-}
-
-void DataSender::logVector(const myo::Vector3<float>& vec) {
-  logVal(vec.x());
-  logVal(vec.y());
-  logVal(vec.z());
-}
-
-void DataSender::logQuaterion(const myo::Quaternion<float>& quat) {
-  logVal(quat.x());
-  logVal(quat.y());
-  logVal(quat.z());
-  logVal(quat.w());
-}
 
 osc::OutboundPacketStream DataSender::beginMessage(const std::string& path) {
   osc::OutboundPacketStream p(_buffer, OUTPUT_BUFFER_SIZE);
@@ -72,29 +41,21 @@ void DataSender::sendMessage(const std::array<std::string, emgLength>& path,
   }
 }
 
-void DataSender::sendMessage(const std::string& path, const char* val) {
-  send(beginMessage(path)
-       << val << osc::EndMessage);
-  if (_settings.logging) {
-    logPath(path);
-    std::cout << "  " << std::right << val;
-    std::cout << std::endl;
-  }
-}
-
 void DataSender::sendMessage(const std::array<std::string, 3>& path,
                              myo::Vector3<float> vec) {
-  sendMessage(path[0], vec.x());
-  sendMessage(path[1], vec.y());
-  sendMessage(path[2], vec.z());
+  send(path[0], vec.x());
+  send(path[1], vec.y());
+  send(path[2], vec.z());
+  _logger.verboseMessage(path, vec);
 }
 
 void DataSender::sendMessage(const std::array<std::string, 4>& path,
                              myo::Quaternion<float> quat) {
-  sendMessage(path[0], quat.x());
-  sendMessage(path[1], quat.y());
-  sendMessage(path[2], quat.z());
-  sendMessage(path[3], quat.w());
+  send(path[0], quat.x());
+  send(path[1], quat.y());
+  send(path[2], quat.z());
+  send(path[3], quat.w());
+  _logger.verboseMessage(path, quat);
 }
 
 void DataSender::onPair(MyoPtr device, uint64_t timestamp,
@@ -120,10 +81,10 @@ void DataSender::onDisconnect(MyoPtr device, uint64_t timestamp) {
 void DataSender::onArmSync(MyoPtr device, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation, myo::WarmupState warmupState) {
   const auto& paths = devicePaths(device);
   sendMessage(paths.synced, true);
-  sendMessage(paths.arm, static_cast<int8_t>(arm));
-  sendMessage(paths.deviceDirection, static_cast<int8_t>(xDirection));
-  sendMessage(paths.armRotation, static_cast<int8_t>(rotation));
-  sendMessage(paths.warmupState, static_cast<int8_t>(warmupState));
+  sendEnumMessage(paths.arm, arm);
+  sendEnumMessage(paths.deviceDirection, xDirection);
+  sendMessage(paths.armRotation, rotation);
+  sendEnumMessage(paths.warmupState, warmupState);
 }
 
 void DataSender::onArmUnsync(MyoPtr device, uint64_t timestamp) {
@@ -150,7 +111,7 @@ void DataSender::flushPoseStates() {
   for (auto& state : _devices) {
     for (auto i = 0; i < numPoses; i++) {
       if (state.poses[i]) {
-        sendMessage(state.paths.poses[i], true);
+        sendMessage(state.paths.poses[i], false);
         state.poses[i] = false;
       }
     }
@@ -188,5 +149,5 @@ void DataSender::onEmgData(MyoPtr device, uint64_t timestamp, const int8_t *emg)
 }
 
 void DataSender::onWarmupCompleted(MyoPtr device, uint64_t timestamp, myo::WarmupResult warmupResult) {
-  sendMessage(devicePaths(device).warmupResult, static_cast<int8_t>(warmupResult));
+  sendEnumMessage(devicePaths(device).warmupResult, warmupResult);
 }

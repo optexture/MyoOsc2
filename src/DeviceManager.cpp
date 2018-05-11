@@ -22,11 +22,13 @@ DeviceState& DeviceManager::registerDevice(MyoPtr device) {
   return _devices.back();
 }
 
-void DeviceManager::unregisterDevice(MyoPtr device) {
+MyoId DeviceManager::unregisterDevice(MyoPtr device) {
   for (DeviceState& state : _devices) {
     if (state.device == device) {
+      auto id = state.deviceId;
       state.clear();
-      return;
+      return id;
     }
   }
+  return unknownMyoId;
 }

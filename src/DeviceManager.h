@@ -32,7 +32,7 @@ using DeviceStateList = std::vector<DeviceState>;
 class DeviceManager {
 public:
   DeviceState& registerDevice(MyoPtr device);
-  void unregisterDevice(MyoPtr device);
+  MyoId unregisterDevice(MyoPtr device);
   DeviceState& operator[](MyoPtr device) {
     return registerDevice(device);
   }

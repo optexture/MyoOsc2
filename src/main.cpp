@@ -9,6 +9,7 @@
 #include "Common.h"
 #include "DeviceManager.h"
 #include "DataSender.h"
+#include "Logger.h"
 #include "Settings.h"
 
 int main(int argc, char * argv[]) {
@@ -19,10 +20,12 @@ int main(int argc, char * argv[]) {
       return 1;
     }
 
-    std::cout << "Sending Myo OSC to " << settings.hostname << ":" << settings.port << "\n";
+    Logger logger(settings);
+
+    logger.log() << "Sending Myo OSC to " << settings.hostname << ":" << settings.port << "\n";
 
     DeviceManager devices;
-    DataSender sender(devices, settings);
+    DataSender sender(devices, settings, logger);
 
     myo::Hub hub("com.optexture.myoosc2");
     hub.addListener(&sender);

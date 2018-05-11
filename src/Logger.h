@@ -1,8 +1,9 @@
 #pragma once
 
-#include <iomanip>
+#include <array>
 #include <iostream>
-#include <NullOStream.h>
+#include <myo.hpp>
+#include "NullOStream.h"
 #include "Common.h"
 #include "Settings.h"
 
@@ -15,23 +16,22 @@ public:
 
   std::ostream& verboseMessage(const std::string& path);
 
-  template<
-    typename T,
-    typename = std::enable_if_t<std::is_floating_point_v<T> > >
-  void verboseMessage(const std::string& path, T val) {
-    verboseMessage(path) << "  " << std::right << std::setprecision(2) << val << '\n';
-  }
+  void verboseMessage(const std::string& path, float val);
 
-  template<
-    typename T,
-    typename = std::enable_if_t<std::is_integral_v<T> > >
-  void verboseMessage(const std::string& path, T val) {
-    verboseMessage(path) << "  " << std::setw(10) << std::right << val << '\n';
-  }
+  void verboseMessage(const std::string& path, std::int8_t val);
 
-  void verboseMessage(const std::string& path, bool val) {
-    verboseMessage(path) << "  " << std::boolalpha << std::right << val << '\n';
-  }
+  void verboseMessage(const std::string& path, std::uint8_t val);
+
+  void verboseMessage(const std::string& path, bool val);
+
+  void verboseMessage(const std::array<std::string, 3>& path,
+                      const myo::Vector3<float>& val);
+
+  void verboseMessage(const std::array<std::string, 4>& path,
+                      const myo::Quaternion<float>& val);
+
+  void verboseMessage(const std::array<std::string, emgLength>& path,
+                      const std::int8_t* vals);
 private:
   const Settings& _settings;
   NulOStream _nullStream;
