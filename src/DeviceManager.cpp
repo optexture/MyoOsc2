@@ -4,6 +4,15 @@
 //
 
 #include "DeviceManager.h"
+#include <iomanip>
+
+std::ostream& operator<<(std::ostream& os, MyoPtr device) {
+  return os << std::hex << std::showbase << std::internal << std::setw(8) << std::setfill('0') << std::addressof(device);
+}
+
+std::ostream& operator<<(std::ostream& os, const DeviceState& state) {
+  return os << "device " << state.deviceId << " [" << state.device << "]";
+}
 
 DeviceState& DeviceManager::registerDevice(MyoPtr device) {
   for (DeviceState& state : _devices) {

@@ -8,6 +8,7 @@
 #include "Common.h"
 #include "DataPaths.h"
 #include <array>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -26,6 +27,8 @@ public:
   MyoPtr device;
   std::array<bool, numPoses> poses;
 };
+
+std::ostream& operator<<(std::ostream& os, const DeviceState& state);
 
 using DeviceStateList = std::vector<DeviceState>;
 

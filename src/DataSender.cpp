@@ -4,6 +4,7 @@
 //
 
 #include "DataSender.h"
+#include <iomanip>
 
 static myo::Vector3<float>
 quaternionToVector(const myo::Quaternion<float>& quat) {
@@ -60,26 +61,36 @@ void DataSender::sendMessage(const std::array<std::string, 4>& path,
 
 void DataSender::onPair(MyoPtr device, uint64_t timestamp,
                         myo::FirmwareVersion firmwareVersion) {
-  sendMessage(devicePaths(device).paired, true);
+  const auto& state = _devices[device];
+  _logger.log() << "Paired " << state << std::endl;
+  sendMessage(state.paths.paired, true);
 }
 
 void DataSender::onUnpair(MyoPtr device, uint64_t timestamp) {
-  sendMessage(devicePaths(device).paired, false);
+  const auto& state = _devices[device];
+  _logger.log() << "Unpaired " << state << std::endl;
+  sendMessage(state.paths.paired, false);
 }
 
 void DataSender::onConnect(MyoPtr device, uint64_t timestamp, myo::FirmwareVersion firmwareVersion) {
+  const auto& state = _devices[device];
+  _logger.log() << "Connect " << state << std::endl;
   device->setStreamEmg(myo::Myo::streamEmgEnabled);
   // unlock..?
-  sendMessage(devicePaths(device).connected, true);
+  sendMessage(state.paths.connected, true);
 }
 
 void DataSender::onDisconnect(MyoPtr device, uint64_t timestamp) {
-  sendMessage(devicePaths(device).connected, false);
+  const auto& state = _devices[device];
+  _logger.log() << "Disconnect " << state << std::endl;
+  sendMessage(state.paths.connected, false);
   _devices.unregisterDevice(device);
 }
 
 void DataSender::onArmSync(MyoPtr device, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation, myo::WarmupState warmupState) {
-  const auto& paths = devicePaths(device);
+  const auto& state = _devices[device];
+  _logger.log() << "Arm sync " << state << std::endl;
+  const auto& paths = state.paths;
   sendMessage(paths.synced, true);
   sendEnumMessage(paths.arm, arm);
   sendEnumMessage(paths.deviceDirection, xDirection);
@@ -88,16 +99,21 @@ void DataSender::onArmSync(MyoPtr device, uint64_t timestamp, myo::Arm arm, myo:
 }
 
 void DataSender::onArmUnsync(MyoPtr device, uint64_t timestamp) {
-  const auto& paths = devicePaths(device);
-  sendMessage(paths.synced, false);
+  const auto& state = _devices[device];
+  _logger.log() << "Arm unsync " << state << std::endl;
+  sendMessage(state.paths.synced, false);
 }
 
 void DataSender::onUnlock(MyoPtr device, uint64_t timestamp) {
-  sendMessage(devicePaths(device).locked, false);
+  const auto& state = _devices[device];
+  _logger.log() << "Unlock " << state << std::endl;
+  sendMessage(state.paths.locked, false);
 }
 
 void DataSender::onLock(MyoPtr device, uint64_t timestamp) {
-  sendMessage(devicePaths(device).locked, true);
+  const auto& state = _devices[device];
+  _logger.log() << "Lock " << state << std::endl;
+  sendMessage(state.paths.locked, true);
 }
 
 void DataSender::onPose(MyoPtr device, uint64_t timestamp, myo::Pose pose) {
