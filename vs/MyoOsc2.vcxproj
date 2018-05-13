@@ -124,6 +124,7 @@
     <ClCompile Include="..\src\DataPaths.cpp" />
     <ClCompile Include="..\src\DataSender.cpp" />
     <ClCompile Include="..\src\DeviceManager.cpp" />
+    <ClCompile Include="..\src\Logger.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Settings.cpp" />
   </ItemGroup>
@@ -146,6 +147,7 @@
     <ClInclude Include="..\src\DataPaths.h" />
     <ClInclude Include="..\src\DataSender.h" />
     <ClInclude Include="..\src\DeviceManager.h" />
+    <ClInclude Include="..\src\Logger.h" />
     <ClInclude Include="..\src\Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
