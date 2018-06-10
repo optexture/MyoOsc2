@@ -5,15 +5,45 @@
 
 #include "DataPaths.h"
 
+static DeviceDataPaths unknownPaths("/__/");
+
+DataPaths::DataPaths()
+: _arms {
+  DeviceDataPaths::byArm(myo::Arm::armLeft),
+  DeviceDataPaths::byArm(myo::Arm::armRight)
+} {}
+
 const DeviceDataPaths& DataPaths::operator[](MyoId id) {
   while (id >= _devices.size()) {
-    _devices.emplace_back(id);
+    _devices.push_back(DeviceDataPaths::byDeviceId(id));
   }
   return _devices[id];
 }
 
-DeviceDataPaths::DeviceDataPaths(MyoId id) {
+const DeviceDataPaths& DataPaths::operator[](myo::Arm arm) const {
+  if (arm < 0 || arm >= numArms) {
+    return unknownPaths;
+  }
+  return _arms[static_cast<std::size_t>(arm)];
+}
+
+DeviceDataPaths DeviceDataPaths::byDeviceId(MyoId id) {
   std::string base = "/myo/" + std::to_string(static_cast<int>(id)) + "/";
+  return DeviceDataPaths(base);
+}
+
+DeviceDataPaths DeviceDataPaths::byArm(myo::Arm arm) {
+  switch (arm) {
+    case myo::Arm::armLeft:
+      return DeviceDataPaths("/arm/left/");
+    case myo::Arm::armRight:
+      return DeviceDataPaths("/arm/right/");
+    default:
+      return unknownPaths;
+  }
+}
+
+DeviceDataPaths::DeviceDataPaths(std::string base) {
   paired = base + "paired";
   connected = base + "connected";
   synced = base + "synced";

@@ -19,9 +19,11 @@ quaternionToVector(const myo::Quaternion<float>& quat) {
 
 DataSender::DataSender(DeviceManager& devices,
                        const Settings& settings,
+                       const DataPaths& dataPaths,
                        Logger& logger)
 : _devices(devices)
 , _settings(settings)
+, _dataPaths(dataPaths)
 , _logger(logger)
 , _socket(std::make_unique<UdpTransmitSocket>(IpEndpointName(settings.hostname.c_str(), settings.port))) {}
 
@@ -117,6 +119,9 @@ void DataSender::onLock(MyoPtr device, uint64_t timestamp) {
 }
 
 void DataSender::onPose(MyoPtr device, uint64_t timestamp, myo::Pose pose) {
+  if (pose.type() == myo::Pose::Type::unknown) {
+    return;
+  }
   auto& state = _devices[device];
   auto i = static_cast<std::size_t>(pose.type());
   sendMessage(state.paths.poses[i], true);
@@ -135,25 +140,46 @@ void DataSender::flushPoseStates() {
 }
 
 void DataSender::onOrientationData(MyoPtr device, uint64_t timestamp, const myo::Quaternion<float> &rotation) {
-  const auto& paths = devicePaths(device);
-  sendMessage(paths.orientQuat, rotation);
-  sendMessage(paths.orientVec, quaternionToVector(rotation));
+  auto vec = quaternionToVector(rotation);
+  const auto& state = _devices[device];
+  sendMessage(state.paths.orientQuat, rotation);
+  sendMessage(state.paths.orientVec, vec);
+  if (state.armValid()) {
+    const auto& armPaths = _dataPaths[state.arm];
+    sendMessage(armPaths.orientQuat, rotation);
+    sendMessage(armPaths.orientVec, vec);
+  }
 }
 
 // units of g
 void DataSender::onAccelerometerData(MyoPtr device, uint64_t timestamp,
                                      const myo::Vector3<float>& accel)
 {
-  sendMessage(devicePaths(device).accel, accel);
+  const auto& state = _devices[device];
+  sendMessage(state.paths.accel, accel);
+  if (state.armValid()) {
+    const auto& armPaths = _dataPaths[state.arm];
+    sendMessage(armPaths.accel, accel);
+  }
 }
 
 void DataSender::onGyroscopeData(MyoPtr device, uint64_t timestamp,
                                  const myo::Vector3<float> &gyro) {
-  sendMessage(devicePaths(device).gyro, gyro);
+  const auto& state = _devices[device];
+  sendMessage(state.paths.gyro, gyro);
+  if (state.armValid()) {
+    const auto& armPaths = _dataPaths[state.arm];
+    sendMessage(armPaths.gyro, gyro);
+  }
 }
 
 void DataSender::onRssi(MyoPtr device, uint64_t timestamp, int8_t rssi) {
-  sendMessage(devicePaths(device).rssi, rssi);
+  const auto& state = _devices[device];
+  sendMessage(state.paths.rssi, rssi);
+  if (state.armValid()) {
+    const auto& armPaths = _dataPaths[state.arm];
+    sendMessage(armPaths.rssi, rssi);
+  }
 }
 
 void DataSender::onBatteryLevelReceived(MyoPtr device, uint64_t timestamp, uint8_t level) {
@@ -161,7 +187,12 @@ void DataSender::onBatteryLevelReceived(MyoPtr device, uint64_t timestamp, uint8
 }
 
 void DataSender::onEmgData(MyoPtr device, uint64_t timestamp, const int8_t *emg) {
-  sendMessage(devicePaths(device).emg, emg);
+  const auto& state = _devices[device];
+  sendMessage(state.paths.emg, emg);
+  if (state.armValid()) {
+    const auto& armPaths = _dataPaths[state.arm];
+    sendMessage(armPaths.emg, emg);
+  }
 }
 
 void DataSender::onWarmupCompleted(MyoPtr device, uint64_t timestamp, myo::WarmupResult warmupResult) {

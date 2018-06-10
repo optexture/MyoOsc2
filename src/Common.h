@@ -20,6 +20,8 @@ const std::size_t emgLength = 8;
 
 const std::size_t numPoses = libmyo_num_poses;
 
+const std::size_t numArms = 2;
+
 using EmgArray = std::array<std::int8_t, emgLength>;
 using PoseArray = std::array<bool, numPoses>;
 

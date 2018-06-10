@@ -22,6 +22,7 @@ class DataSender : public myo::DeviceListener {
 public:
   DataSender(DeviceManager& devices,
              const Settings& settings,
+             const DataPaths& dataPaths,
              Logger& logger);
 
   virtual ~DataSender() {}
@@ -195,6 +196,7 @@ private:
 
   DeviceManager& _devices;
   const Settings& _settings;
+  const DataPaths& _dataPaths;
   Logger& _logger;
   char _buffer[OUTPUT_BUFFER_SIZE];
   std::unique_ptr<UdpTransmitSocket> _socket;

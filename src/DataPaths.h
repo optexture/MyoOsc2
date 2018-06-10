@@ -12,7 +12,11 @@
 
 class DeviceDataPaths {
 public:
-  explicit DeviceDataPaths(MyoId id);
+  static DeviceDataPaths byDeviceId(MyoId id);
+  static DeviceDataPaths byArm(myo::Arm arm);
+
+  DeviceDataPaths() {}
+  explicit DeviceDataPaths(std::string base);
 
   std::string paired;
   std::string connected;
@@ -35,7 +39,10 @@ public:
 
 class DataPaths {
 public:
+  DataPaths();
   const DeviceDataPaths& operator[](MyoId id);
+  const DeviceDataPaths& operator[](myo::Arm arm) const;
 private:
   std::vector<DeviceDataPaths> _devices;
+  std::array<DeviceDataPaths, numArms> _arms;
 };

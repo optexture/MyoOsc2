@@ -24,8 +24,9 @@ int main(int argc, char * argv[]) {
 
     logger.log() << "Sending Myo OSC to " << settings.hostname << ":" << settings.port << "\n";
 
-    DeviceManager devices;
-    DataSender sender(devices, settings, logger);
+    DataPaths dataPaths;
+    DeviceManager devices(dataPaths);
+    DataSender sender(devices, settings, dataPaths, logger);
 
     myo::Hub hub("com.optexture.myoosc2");
     hub.addListener(&sender);
